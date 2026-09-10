@@ -1,0 +1,102 @@
+openapi: 3.2.0
+info:
+  title: Mobile API
+  description: |-
+    Описание получения пациентом списка своих предстоящих записей к врачу. 
+  version: 1.0.0
+servers:
+  - url:  https://mobil.ru/v1
+    description: Production server (OAS 3.2)
+  - url: https://1232
+    description: Staging server
+tags:
+  - name: appointments
+    description: Сервис по работе с записями
+paths:
+  /appointments/{patientId}:
+    get:
+      tags:
+        - appointments
+      description: Предоставление записей пациента
+      operationId: getAppointments
+      parameters:
+        - name: patientId
+          in: path
+          description: Идентификатор пациента
+          required: true
+          explode: true
+          schema:
+            type: integer
+            format: int64  
+        - name: limit
+          in: query
+          description: Кол-во возвращаемых записей 
+          required: true
+          explode: true
+          schema:
+            type: integer
+            format: int
+        - name: offset
+          in: query
+          description: Кол-во возвращаемых записей 
+          required: true
+          explode: true
+          schema:
+            type: integer
+            format: int                               
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientAppointment'
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientAppointment'
+        '400':
+          description: Invalid status value
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    PatientAppointment:
+      type: object
+      properties:
+        patientId:
+          type: integer
+          format: int64
+          examples: [198772]
+        appointments:
+          type: array
+          items:
+             $ref: '#/components/schemas/Appointment'
+    Appointment:
+      type: object
+      properties: 
+        date:
+          type: string
+          format: date-time
+          description: дата записи 
+        slotId: 
+          type: integer 
+          format: int64
+          description: Идентификатор слота у врача в который попала запись
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
